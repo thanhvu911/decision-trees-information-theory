@@ -127,7 +127,7 @@ for comparison.
 
 | Experiment | Claim tested | Short answer |
 |---|---|---|
-| E1 | Information gain is "biased toward features with many levels" | True, and the size of the bias follows a formula from information theory. Gain ratio helps only in shallow trees |
+| E1 | Information gain is "biased toward features with many levels" | True, and the size of the bias follows a formula from information theory. Gain ratio reduces it but does not remove it |
 | E2 | Pre-pruning "performs poorly when exposed to new data"; post-pruning "demands high-quality processors" | Neither holds. Both pruning methods beat the full tree by about 4 points on Adult, and post-pruning took 26 seconds on 2 cores |
 | E3 | (new question) Does a pruning choice made on pooled accuracy hide changes for particular groups? | Yes. Pruning raised accuracy for every group but widened the gap in missed high earners between women and men |
 
@@ -139,9 +139,11 @@ degrees of freedom (the G-test), so the expected spurious gain is about
 **(K − 1) / (2n ln 2) bits**.
 
 **Part A: the formula holds.** Random features scored against the real Adult labels, 200
-draws per cell, match the formula within sampling error when n is much larger than K. On
-all 48,842 rows: 0.00146 measured vs 0.00146 predicted for K = 100, and 0.0150 vs 0.0148
-for K = 1,000. When K approaches n the formula breaks down, because gain cannot exceed the
+draws per cell, match the formula closely when n is much larger than K. On all 48,842
+rows: 0.00146 measured vs 0.00146 predicted for K = 100. For K = 1,000 (only about 49 rows
+per value) the measured gain is 0.0150 against 0.0148 predicted, about 2% higher. That gap
+is small but real (well outside sampling error), and it grows as rows per value fall: the
+chi-squared approximation gets worse. When K approaches n the formula breaks down, because gain cannot exceed the
 label entropy (0.79 bits). The practical point: by the formula, a random 1,000-value feature
 beats the best real feature at the root (`relationship`, 0.165 bits) in any node with fewer
 than about 4,400 rows. A random 100-value feature does so below about 430 rows.
@@ -167,13 +169,18 @@ compared with the same tree grown without the noise feature, over 10 random 70/3
 - The noise feature was never chosen at the root, where the node holds all 34,189 training
   rows. With 1,000 values it was chosen one level down in every run, because those nodes
   are smaller. This is the formula at work: the bias is worst deep in the tree.
-- Gain ratio, C4.5's fix, cuts the damage for a 100-value feature in shallow trees. With
-  1,000 values and depth 5 or more it is fooled almost as badly as plain information gain.
+- Gain ratio, C4.5's fix, cuts the damage for a 100-value feature at every depth (3% vs 65%
+  of rows at depth 3, 49% vs 99% at depth 5, 82% vs 99% at depth 8). With 1,000 values and
+  depth 5 or more it is fooled almost as badly as plain information gain.
   In a small node nearly every row has its own noise value, so the split looks perfectly
   pure, and dividing by the split information does not offset that.
 - Without a noise feature, gain ratio was slightly more accurate (82.8% vs 82.6% at depth 3,
-  82.1% vs 81.5% at depth 8) and its depth-3 trees were much smaller (about 200 leaves vs
-  540 to 620 in the splits checked).
+  82.1% vs 81.5% at depth 8) and its depth-3 trees were much smaller (192 to 266 leaves vs
+  539 to 655; column `leaves_without_noise` in `e1_trees.csv`).
+- One caveat on the gain-ratio column: C4.5 only considers features whose gain is at least
+  the average gain, and adding any extra column changes that average. So part of each
+  gain-ratio accuracy change comes from the threshold moving, not from splits on noise. A
+  2-value noise column that is never split on still changes most gain-ratio trees.
 
 Full C4.5 also refuses splits whose branches are too small and prunes afterwards; those are
 left out here on purpose, to isolate the splitting criterion.
@@ -197,9 +204,9 @@ the 10 splits, entropy criterion:
   every split, with trees about 19 to 50 times smaller. Post-pruning beat pre-pruning by 0.4 points
   on average (in 19 of 20 split-and-criterion pairs) with about a third as many leaves.
 - **On the two small datasets, it does not.** No method differed by more than the
-  split-to-split variation (standard deviation 1 to 2 points).
+  split-to-split variation (standard deviation 0.6 to 2.6 points).
 - **The paper's claims do not hold.** Pre-pruning with limits chosen by cross-validation was
-  within 0.4 points of post-pruning, not "poor". Post-pruning cost about twice the tuning
+  within 0.4 points of post-pruning (0.5 with Gini), not "poor". Post-pruning cost about twice the tuning
   time of pre-pruning, but that was 26 seconds on a 2-core machine for 34,000 training rows.
 - **Entropy vs Gini made little difference**: at most 0.6 points apart on Adult and breast
   cancer, less than the split-to-split variation; entropy was 0.7 to 0.9 points ahead on
@@ -230,7 +237,9 @@ Means over 10 splits, entropy criterion, unpruned → post-pruned:
   → 6.4% overall). Along the way women's FNR rose 3.7 points and men's 0.5 points, so the
   gap grew from 6.7 to 9.9 points. It widened in 7 of 10 splits, for both entropy and Gini.
   On the single split plotted above, women's FNR goes from 39% for the full tree to 53% at
-  the cross-validated choice of 69 leaves; men's goes from 36% to 43%.
+  the cross-validated choice of 69 leaves; men's goes from 36% to 43%. That exact choice
+  depends on the alpha grid: E2's coarser grid picks 91 leaves on the same split (women
+  50%, men 39%). The direction is the same.
 - **The race groups show no consistent pattern.** With about 170 Black and 160 "other
   races" positive cases per test split, these estimates are noisy.
 

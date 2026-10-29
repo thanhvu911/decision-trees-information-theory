@@ -89,7 +89,8 @@ def part_b(X, y):
                         "rows_reaching_noise_split": sum(n for d, f, n in nodes if f == noise_col) / len(tr),
                         "shallowest_noise_depth": min(noise_nodes) if noise_nodes else np.nan,
                         "root_is_noise": nodes[0][1] == noise_col if nodes else False,
-                        "leaves": tree.n_leaves(), "seconds": time.time() - t0,
+                        "leaves": tree.n_leaves(), "leaves_without_noise": base.n_leaves(),
+                        "seconds": time.time() - t0,
                     })
         print(f"seed {seed} done", flush=True)
     return pd.DataFrame(rows)
