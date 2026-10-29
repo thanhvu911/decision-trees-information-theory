@@ -1,0 +1,14 @@
+{
+  "source": "https://raw.githubusercontent.com/jbrownlee/Datasets/master/adult-all.csv",
+  "sha256": "21e0ea2f925a00338929a8c86c27354c72ac1c79819bcca81c7d91c3d64218c2",
+  "rows": 48842,
+  "columns": 15,
+  "missing_values_marked_?": {
+    "workclass": 2799,
+    "occupation": 2809,
+    "native_country": 857
+  },
+  "rows_with_any_missing": 3620,
+  "duplicate_rows": 52,
+  "share_income_over_50k": 0.2393
+}

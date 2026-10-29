@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+.pytest_cache/
+# downloaded data: rebuilt by study/data/fetch_adult.py (checksum-verified)
+study/data/adult-all.csv
+study/data/adult.csv
