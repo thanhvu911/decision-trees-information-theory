@@ -10,7 +10,7 @@ Marshall College (Fall 2024), written by **Thanh Vu and Nam** as a two-person fi
 
 It explains how decision trees use **entropy** and **information gain** to choose splits, and
 how **feature selection** and **pruning** keep trees from overfitting. The paper itself is a
-survey with worked examples. In October 2026 I added a **follow-up study** (`study/`) that
+survey with worked examples. In October 2026 I added an AI-assisted **follow-up study** (`study/`) that
 tests three of its claims with experiments on real data; the results are at the end of this
 page.
 
@@ -270,8 +270,9 @@ Means over 10 splits, entropy criterion, unpruned → post-pruned:
 
 ### How this was made
 
-The study was designed and run in October 2026 with help from an AI assistant (Claude),
-which wrote much of the code. Commits made with its help are marked `Co-Authored-By`.
+The paper and slides are our Fall 2024 coursework (Thanh Vu and Nam). The follow-up study
+and the analysis of the paper were designed and run in October 2026 by an AI assistant
+(Claude) at my request; it wrote most of the code and text in `study/` and `analysis/`.
 
 ### Reproduce the study
 
